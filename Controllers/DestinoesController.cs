@@ -23,6 +23,11 @@ namespace Api.Controllers
 
 
         // GET: api/destino
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos()
+        {
+            return await _context.Destinos.ToListAsync();
+        }
 
         // GET: api/Destinoes/by-email/user@example.com
         [HttpGet("by-email/{email}")]

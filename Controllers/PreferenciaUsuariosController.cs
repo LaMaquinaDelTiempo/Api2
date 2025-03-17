@@ -26,6 +26,7 @@ namespace Api.Controllers
         {
             return await _context.PreferenciaUsuarios.ToListAsync();
         }
+        
 
         // GET: api/PreferenciaUsuarios/5
         [HttpGet("{id}")]

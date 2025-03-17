@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Api.DataContext;
+using NuGet.Protocol;
 
 namespace Api.Controllers
 {
@@ -20,12 +21,77 @@ namespace Api.Controllers
             _context = context;
         }
 
-        // GET: api/Destinoes
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos()
+
+        // GET: api/destino
+
+        // GET: api/Destinoes/by-email/user@example.com
+        [HttpGet("by-email/{email}")]
+        public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos(string email)
         {
-            return await _context.Destinos.ToListAsync();
+            // Buscar usuario incluyendo sus preferencias
+            var usuario = await _context.Usuarios
+                .Include(u => u.PreferenciaUsuarios)
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (usuario == null)
+            {
+                return NotFound("Usuario no encontrado");
+            }
+
+            // Obtener IDs de preferencias del usuario
+            var preferenciasIds = usuario.PreferenciaUsuarios
+                .Select(p => p.PreferenciasId)
+                .ToList();
+
+            // Si no tiene preferencias, devolver destinos por defecto
+            if (!preferenciasIds.Any())
+            {
+                return await _context.Destinos
+                    .Where(d => d.Id == 39 || d.Id == 40) // Usar OR en lugar de AND
+                    .ToListAsync();
+            }
+
+            // Obtener destinos relacionados con las preferencias
+            var destinos = await _context.DestinosPreferencias
+                .Where(dp => preferenciasIds.Contains(dp.PreferenciasId))
+                .Select(dp => dp.Destinos)
+                .Distinct()
+                .ToListAsync();
+
+            return destinos;
         }
+
+        /* [HttpGet("destino/{email}")]
+         public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos(string email)
+         {
+             var usuario = await _context.Usuarios.FindAsync(email);
+             if (usuario == null)
+             {
+                 return NotFound();
+             }
+            return _context.Destinos;
+
+             /*
+                         var preferenciasUsuarios = await _context.PreferenciaUsuarios
+                             .Where(pu => pu.UsuariosId == usuario.Id)
+                             .Select(pu => pu.PreferenciasId)
+                             .ToListAsync();
+
+                         var destinos = await _context.DestinosPreferencias
+                             .Where(dp => preferenciasUsuarios.Contains(dp.PreferenciasId))
+                             .Select(dp => dp.Destinos)
+                             .ToListAsync();
+                         if (destinos == null)
+                         {
+                             // Reemplazar la línea con el error CS0029
+                             if (destinos == null)
+                             {
+                                 return await _context.Destinos.Where(d => d.Id == 39 && d.Id == 40).ToListAsync();
+                             }
+
+                         }
+                         return destinos; 
+         }*/
 
         // GET: api/Destinoes/5
         [HttpGet("{id}")]

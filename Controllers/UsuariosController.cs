@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Api.Models;
+using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Api.DataContext;
-using Api.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
@@ -14,95 +10,62 @@ namespace Api.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        private readonly AmadeusContext _context;
+        private readonly IUsuarioService _usuarioService;
 
-        public UsuariosController(AmadeusContext context)
+        public UsuariosController(IUsuarioService usuarioService)
         {
-            _context = context;
+            _usuarioService = usuarioService;
         }
 
         // GET: api/Usuarios
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
-            return await _context.Usuarios.ToListAsync();
+            var usuarios = await _usuarioService.GetAllUsuariosAsync();
+            return Ok(usuarios);
         }
 
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Usuario>> GetUsuario(long id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-
+            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
             if (usuario == null)
-            {
                 return NotFound();
-            }
+            return Ok(usuario);
+        }
 
-            return usuario;
+        // POST: api/Usuarios
+        [HttpPost]
+        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        {
+            var createdUsuario = await _usuarioService.CreateUsuarioAsync(usuario);
+            return CreatedAtAction(nameof(GetUsuario), new { id = createdUsuario.Id }, createdUsuario);
         }
 
         // PUT: api/Usuarios/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUsuario(long id, Usuario usuario)
         {
             if (id != usuario.Id)
-            {
                 return BadRequest();
-            }
 
-            _context.Entry(usuario).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UsuarioExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var updatedUsuario = await _usuarioService.UpdateUsuarioAsync(usuario);
+            if (updatedUsuario == null)
+                return NotFound();
 
             return NoContent();
-        }
-
-        // POST: api/Usuarios
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
-        {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
         }
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(long id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
-            {
+            var result = await _usuarioService.DeleteUsuarioAsync(id);
+            if (!result)
                 return NotFound();
-            }
-
-            _context.Usuarios.Remove(usuario);
-            await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool UsuarioExists(long id)
-        {
-            return _context.Usuarios.Any(e => e.Id == id);
         }
     }
 }

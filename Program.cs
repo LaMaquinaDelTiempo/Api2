@@ -1,4 +1,6 @@
 using Api.DataContext;
+using Api.Repositories;
+using Api.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -6,6 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Configurar PostgreSQL
 builder.Services.AddDbContext<AmadeusContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+// Registrar repositorios y servicios
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 // Add services to the container.
 
 builder.Services.AddControllers();

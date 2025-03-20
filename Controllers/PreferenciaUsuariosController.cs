@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Api.Models;
+using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Api.DataContext;
-using Api.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
@@ -14,96 +10,62 @@ namespace Api.Controllers
     [ApiController]
     public class PreferenciaUsuariosController : ControllerBase
     {
-        private readonly AmadeusContext _context;
+        private readonly IPreferenciaUsuarioService _preferenciaUsuarioService;
 
-        public PreferenciaUsuariosController(AmadeusContext context)
+        public PreferenciaUsuariosController(IPreferenciaUsuarioService preferenciaUsuarioService)
         {
-            _context = context;
+            _preferenciaUsuarioService = preferenciaUsuarioService;
         }
 
         // GET: api/PreferenciaUsuarios
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PreferenciaUsuario>>> GetPreferenciaUsuarios()
         {
-            return await _context.PreferenciaUsuarios.ToListAsync();
+            var result = await _preferenciaUsuarioService.GetAllPreferenciaUsuariosAsync();
+            return Ok(result);
         }
-        
 
         // GET: api/PreferenciaUsuarios/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PreferenciaUsuario>> GetPreferenciaUsuario(long id)
         {
-            var preferenciaUsuario = await _context.PreferenciaUsuarios.FindAsync(id);
-
-            if (preferenciaUsuario == null)
-            {
+            var result = await _preferenciaUsuarioService.GetPreferenciaUsuarioByIdAsync(id);
+            if (result == null)
                 return NotFound();
-            }
+            return Ok(result);
+        }
 
-            return preferenciaUsuario;
+        // POST: api/PreferenciaUsuarios
+        [HttpPost]
+        public async Task<ActionResult<PreferenciaUsuario>> PostPreferenciaUsuario(PreferenciaUsuario preferenciaUsuario)
+        {
+            var created = await _preferenciaUsuarioService.CreatePreferenciaUsuarioAsync(preferenciaUsuario);
+            return CreatedAtAction(nameof(GetPreferenciaUsuario), new { id = created.Id }, created);
         }
 
         // PUT: api/PreferenciaUsuarios/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPreferenciaUsuario(long id, PreferenciaUsuario preferenciaUsuario)
         {
             if (id != preferenciaUsuario.Id)
-            {
                 return BadRequest();
-            }
 
-            _context.Entry(preferenciaUsuario).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PreferenciaUsuarioExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var updated = await _preferenciaUsuarioService.UpdatePreferenciaUsuarioAsync(preferenciaUsuario);
+            if (updated == null)
+                return NotFound();
 
             return NoContent();
-        }
-
-        // POST: api/PreferenciaUsuarios
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<PreferenciaUsuario>> PostPreferenciaUsuario(PreferenciaUsuario preferenciaUsuario)
-        {
-            _context.PreferenciaUsuarios.Add(preferenciaUsuario);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPreferenciaUsuario", new { id = preferenciaUsuario.Id }, preferenciaUsuario);
         }
 
         // DELETE: api/PreferenciaUsuarios/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePreferenciaUsuario(long id)
         {
-            var preferenciaUsuario = await _context.PreferenciaUsuarios.FindAsync(id);
-            if (preferenciaUsuario == null)
-            {
+            var deleted = await _preferenciaUsuarioService.DeletePreferenciaUsuarioAsync(id);
+            if (!deleted)
                 return NotFound();
-            }
-
-            _context.PreferenciaUsuarios.Remove(preferenciaUsuario);
-            await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool PreferenciaUsuarioExists(long id)
-        {
-            return _context.PreferenciaUsuarios.Any(e => e.Id == id);
         }
     }
 }

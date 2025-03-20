@@ -13,6 +13,9 @@ builder.Services.AddDbContext<AmadeusContext>(options =>
 // Registrar repositorios y servicios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IPreferenciaUsuarioRepository, PreferenciaUsuarioRepository>();
+builder.Services.AddScoped<IPreferenciaUsuarioService, PreferenciaUsuarioService>();
+
 // Add services to the container.
 
 builder.Services.AddControllers();

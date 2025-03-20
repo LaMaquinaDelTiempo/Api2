@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Api.DataContext;
+namespace Api.Models;
 
 public partial class Continente
 {

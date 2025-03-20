@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.DataContext;

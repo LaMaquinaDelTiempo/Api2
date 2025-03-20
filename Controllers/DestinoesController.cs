@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Api.DataContext;
 using NuGet.Protocol;
+using Api.Models;
 
 namespace Api.Controllers
 {

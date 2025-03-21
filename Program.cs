@@ -15,6 +15,8 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IPreferenciaUsuarioRepository, PreferenciaUsuarioRepository>();
 builder.Services.AddScoped<IPreferenciaUsuarioService, PreferenciaUsuarioService>();
+builder.Services.AddScoped<IPreferenciaRepository, PreferenciaRepository>();
+builder.Services.AddScoped<IPreferenciaService, PreferenciaService>();
 
 // Add services to the container.
 

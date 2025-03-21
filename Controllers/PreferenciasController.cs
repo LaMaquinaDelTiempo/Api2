@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Api.Models;
+using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Api.DataContext;
-using Api.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
@@ -14,95 +10,62 @@ namespace Api.Controllers
     [ApiController]
     public class PreferenciasController : ControllerBase
     {
-        private readonly AmadeusContext _context;
+        private readonly IPreferenciaService _preferenciaService;
 
-        public PreferenciasController(AmadeusContext context)
+        public PreferenciasController(IPreferenciaService preferenciaService)
         {
-            _context = context;
+            _preferenciaService = preferenciaService;
         }
 
         // GET: api/Preferencias
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Preferencia>>> GetPreferencias()
         {
-            return await _context.Preferencias.ToListAsync();
+            var result = await _preferenciaService.GetAllPreferenciasAsync();
+            return Ok(result);
         }
 
         // GET: api/Preferencias/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Preferencia>> GetPreferencia(long id)
         {
-            var preferencia = await _context.Preferencias.FindAsync(id);
-
-            if (preferencia == null)
-            {
+            var result = await _preferenciaService.GetPreferenciaByIdAsync(id);
+            if (result == null)
                 return NotFound();
-            }
+            return Ok(result);
+        }
 
-            return preferencia;
+        // POST: api/Preferencias
+        [HttpPost]
+        public async Task<ActionResult<Preferencia>> PostPreferencia(Preferencia preferencia)
+        {
+            var created = await _preferenciaService.CreatePreferenciaAsync(preferencia);
+            return CreatedAtAction(nameof(GetPreferencia), new { id = created.Id }, created);
         }
 
         // PUT: api/Preferencias/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPreferencia(long id, Preferencia preferencia)
         {
             if (id != preferencia.Id)
-            {
                 return BadRequest();
-            }
 
-            _context.Entry(preferencia).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PreferenciaExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var updated = await _preferenciaService.UpdatePreferenciaAsync(preferencia);
+            if (updated == null)
+                return NotFound();
 
             return NoContent();
-        }
-
-        // POST: api/Preferencias
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Preferencia>> PostPreferencia(Preferencia preferencia)
-        {
-            _context.Preferencias.Add(preferencia);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPreferencia", new { id = preferencia.Id }, preferencia);
         }
 
         // DELETE: api/Preferencias/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePreferencia(long id)
         {
-            var preferencia = await _context.Preferencias.FindAsync(id);
-            if (preferencia == null)
-            {
+            var deleted = await _preferenciaService.DeletePreferenciaAsync(id);
+            if (!deleted)
                 return NotFound();
-            }
-
-            _context.Preferencias.Remove(preferencia);
-            await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool PreferenciaExists(long id)
-        {
-            return _context.Preferencias.Any(e => e.Id == id);
         }
     }
 }

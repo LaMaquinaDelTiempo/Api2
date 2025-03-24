@@ -19,9 +19,9 @@ namespace Api.Services
             return await _usuarioRepository.GetAllAsync();
         }
 
-        public async Task<Usuario?> GetUsuarioByIdAsync(long id)
+        public async Task<Usuario?> GetUsuarioByEmailAsync(string email)
         {
-            return await _usuarioRepository.GetByIdAsync(id);
+            return await _usuarioRepository.GetByEmailAsync(email);
         }
 
         public async Task<Usuario> CreateUsuarioAsync(Usuario usuario)

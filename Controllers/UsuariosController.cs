@@ -43,19 +43,20 @@ namespace Api.Controllers
             return CreatedAtAction(nameof(GetUsuario), new { id = createdUsuario.Id }, createdUsuario);
         }
 
-        // PUT: api/Usuarios/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(long id, Usuario usuario)
+        // PUT: api/Usuarios/email@example.com
+        [HttpPut("email/{email}")]
+        public async Task<IActionResult> PutUsuario(string email, Usuario usuario)
         {
-            if (id != usuario.Id)
-                return BadRequest();
+            if (email != usuario.Email)
+                return BadRequest("El email de la URL no coincide con el email del usuario.");
 
-            var updatedUsuario = await _usuarioService.UpdateUsuarioAsync(usuario);
+            var updatedUsuario = await _usuarioService.UpdateUsuarioByEmailAsync(email, usuario);
             if (updatedUsuario == null)
                 return NotFound();
 
             return NoContent();
         }
+
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]

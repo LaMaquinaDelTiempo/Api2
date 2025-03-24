@@ -30,9 +30,9 @@ namespace Api.Services
             return await _usuarioRepository.CreateAsync(usuario);
         }
 
-        public async Task<Usuario?> UpdateUsuarioAsync(Usuario usuario)
+        public async Task<Usuario?> UpdateUsuarioByEmailAsync(string email, Usuario usuario)
         {
-            return await _usuarioRepository.UpdateAsync(usuario);
+            return await _usuarioRepository.UpdateUsuarioByEmailAsync(email, usuario);
         }
 
         public async Task<bool> DeleteUsuarioAsync(long id)

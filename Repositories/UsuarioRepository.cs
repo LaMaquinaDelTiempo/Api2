@@ -37,14 +37,18 @@ namespace Api.Repositories
             return usuario;
         }
 
-        public async Task<Usuario?> UpdateAsync(Usuario usuario)
+        public async Task<Usuario?> UpdateUsuarioByEmailAsync(string email, Usuario usuario)
         {
-            if (!await ExistsAsync(usuario.Id))
+            var existingUsuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+            if (existingUsuario == null)
                 return null;
 
-            _context.Entry(usuario).State = EntityState.Modified;
+            // Mantener el ID original y actualizar solo los valores necesarios
+            usuario.Id = existingUsuario.Id;
+            _context.Entry(existingUsuario).CurrentValues.SetValues(usuario);
+
             await _context.SaveChangesAsync();
-            return usuario;
+            return existingUsuario;
         }
 
         public async Task<bool> DeleteAsync(long id)

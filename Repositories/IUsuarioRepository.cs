@@ -9,7 +9,7 @@ namespace Api.Repositories
         Task<IEnumerable<Usuario>> GetAllAsync();
         Task<Usuario?> GetByEmailAsync(string email);
         Task<Usuario> CreateAsync(Usuario usuario);
-        Task<Usuario?> UpdateAsync(Usuario usuario);
+        Task<Usuario?> UpdateUsuarioByEmailAsync(string email, Usuario usuario);
         Task<bool> DeleteAsync(long id);
         Task<bool> ExistsAsync(long id);
     }

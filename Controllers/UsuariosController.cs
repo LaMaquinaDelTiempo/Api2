@@ -25,11 +25,11 @@ namespace Api.Controllers
             return Ok(usuarios);
         }
 
-        // GET: api/Usuarios/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(long id)
+        // GET: api/Usuarios/email/example@gmail.com
+        [HttpGet("email/{email}")]
+        public async Task<ActionResult<Usuario>> GetUsuario(string email)
         {
-            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+            var usuario = await _usuarioService.GetUsuarioByEmailAsync(email);
             if (usuario == null)
                 return NotFound();
             return Ok(usuario);

@@ -25,6 +25,11 @@ namespace Api.Repositories
             return await _context.Usuarios.FindAsync(id);
         }
 
+        public async Task<Usuario?> GetByEmailAsync(string email)
+        {
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<Usuario> CreateAsync(Usuario usuario)
         {
             _context.Usuarios.Add(usuario);
@@ -59,4 +64,3 @@ namespace Api.Repositories
         }
     }
 }
-

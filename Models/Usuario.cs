@@ -17,5 +17,8 @@ public partial class Usuario
 
     public DateTime? UpdatedAt { get; set; }
 
+    // Nueva propiedad para diferenciar el tipo de usuario
+    public string UserType { get; set; } = "CLIENT"; // Valor por defecto "CLIENT"
+
     public virtual ICollection<PreferenciaUsuario> PreferenciaUsuarios { get; set; } = new List<PreferenciaUsuario>();
 }

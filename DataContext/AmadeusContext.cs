@@ -186,6 +186,11 @@ public partial class AmadeusContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp(6) without time zone")
                 .HasColumnName("updated_at");
+            // Configuración para la nueva propiedad
+            entity.Property(e => e.UserType)
+                .HasMaxLength(10)   // o el tamaño que estimes adecuado
+                .HasColumnName("user_type")
+                .HasDefaultValue("CLIENT");  // Valor por defecto
         });
 
         OnModelCreatingPartial(modelBuilder);

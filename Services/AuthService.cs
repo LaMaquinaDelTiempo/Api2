@@ -35,7 +35,8 @@ namespace Api.Services
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                    new Claim(ClaimTypes.Email, usuario.Email)
+                    new Claim(ClaimTypes.Email, usuario.Email),
+                    new Claim(ClaimTypes.Role, usuario.UserType)
                 }),
                 Expires = DateTime.UtcNow.AddHours(2), // Token válido por 2 horas
                 Issuer = _configuration["Jwt:Issuer"],

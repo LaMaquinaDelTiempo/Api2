@@ -11,6 +11,12 @@ using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+//Configurarar autorizacionces
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("ADMIN"));
+});
 // Configurar JWT
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

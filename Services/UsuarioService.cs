@@ -18,7 +18,10 @@ namespace Api.Services
         {
             return await _usuarioRepository.GetAllAsync();
         }
-
+        public async Task<Usuario?> GetUsuarioByIdAsync(long id)
+        {
+            return await _usuarioRepository.GetByIdAsync(id);
+        }
         public async Task<Usuario?> GetUsuarioByEmailAsync(string email)
         {
             return await _usuarioRepository.GetByEmailAsync(email);

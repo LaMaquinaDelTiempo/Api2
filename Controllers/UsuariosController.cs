@@ -1,11 +1,13 @@
 ﻿using Api.Models;
 using Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -18,13 +20,23 @@ namespace Api.Controllers
         }
 
         // GET: api/Usuarios
+        // Solo usuarios autenticados pueden acceder
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
             var usuarios = await _usuarioService.GetAllUsuariosAsync();
             return Ok(usuarios);
         }
-
+        // GET: api/Usuarios/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Usuario>> GetUsuario(long id)
+        {
+            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+            if (usuario == null)
+                return NotFound();
+            return Ok(usuario);
+        }
         // GET: api/Usuarios/email/example@gmail.com
         [HttpGet("email/{email}")]
         public async Task<ActionResult<Usuario>> GetUsuario(string email)
@@ -34,6 +46,7 @@ namespace Api.Controllers
                 return NotFound();
             return Ok(usuario);
         }
+
 
         // POST: api/Usuarios
         [HttpPost]

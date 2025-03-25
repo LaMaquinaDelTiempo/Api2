@@ -19,12 +19,11 @@ namespace Api.Repositories
         {
             return await _context.Usuarios.ToListAsync();
         }
-
         public async Task<Usuario?> GetByIdAsync(long id)
         {
             return await _context.Usuarios.FindAsync(id);
         }
-
+       
         public async Task<Usuario?> GetByEmailAsync(string email)
         {
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);

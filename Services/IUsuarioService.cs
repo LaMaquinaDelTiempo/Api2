@@ -7,6 +7,7 @@ namespace Api.Services
     public interface IUsuarioService
     {
         Task<IEnumerable<Usuario>> GetAllUsuariosAsync();
+        Task<Usuario?> GetUsuarioByIdAsync(long id);
         Task<Usuario?> GetUsuarioByEmailAsync(string email);
         Task<Usuario> CreateUsuarioAsync(Usuario usuario);
         Task<Usuario?> UpdateUsuarioByEmailAsync(string email, Usuario usuario);

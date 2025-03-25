@@ -8,6 +8,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 // Configurar JWT
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -38,6 +40,8 @@ builder.Services.AddScoped<IPreferenciaRepository, PreferenciaRepository>();
 builder.Services.AddScoped<IPreferenciaService, PreferenciaService>();
 builder.Services.AddScoped<IDestinoRepository, DestinoRepository>();
 builder.Services.AddScoped<IDestinoService, DestinoService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 // Configurar CORS
 builder.Services.AddCors(options =>

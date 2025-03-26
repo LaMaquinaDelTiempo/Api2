@@ -20,14 +20,17 @@ namespace Api.Controllers
         }
 
         // GET: api/Usuarios
-        // Solo usuarios autenticados pueden acceder
-        [Authorize]
+        
+        // Este endpoint solo será accesible para ADMIN
+        [Authorize(Roles = "ADMIN")]
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
             var usuarios = await _usuarioService.GetAllUsuariosAsync();
             return Ok(usuarios);
         }
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Usuario>> GetUsuario(long id)
@@ -37,6 +40,7 @@ namespace Api.Controllers
                 return NotFound();
             return Ok(usuario);
         }
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // GET: api/Usuarios/email/example@gmail.com
         [HttpGet("email/{email}")]
         public async Task<ActionResult<Usuario>> GetUsuario(string email)
@@ -47,7 +51,7 @@ namespace Api.Controllers
             return Ok(usuario);
         }
 
-
+        //todos pueden acceder ya que se usa para el registro
         // POST: api/Usuarios
         [HttpPost]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
@@ -55,7 +59,7 @@ namespace Api.Controllers
             var createdUsuario = await _usuarioService.CreateUsuarioAsync(usuario);
             return CreatedAtAction(nameof(GetUsuario), new { id = createdUsuario.Id }, createdUsuario);
         }
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // PUT: api/Usuarios/email@example.com
         [HttpPut("email/{email}")]
         public async Task<IActionResult> PutUsuario(string email, Usuario usuario)
@@ -70,7 +74,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(long id)

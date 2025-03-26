@@ -12,6 +12,7 @@ using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers
 {
@@ -26,14 +27,16 @@ namespace Api.Controllers
             _destinoService = destinoService;
         }
 
-        // GET: api/Destinoes
+        // GET: api/Destinos
+        // Este endpoint solo será accesible para ADMIN
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos()
         {
             var destinos = await _destinoService.GetAllDestinosAsync();
             return Ok(destinos);
         }
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // GET: api/Destinoes/by-email/user@example.com
         [HttpGet("by-email/{email}")]
         public async Task<ActionResult<IEnumerable<Destino>>> GetDestinosByEmail(string email)
@@ -45,7 +48,7 @@ namespace Api.Controllers
             }
             return Ok(destinos);
         }
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // GET: api/Destinoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Destino>> GetDestino(long id)
@@ -55,7 +58,7 @@ namespace Api.Controllers
                 return NotFound();
             return Ok(destino);
         }
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // PUT: api/Destinoes/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDestino(long id, Destino destino)
@@ -69,7 +72,7 @@ namespace Api.Controllers
 
             return NoContent();
         }
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // POST: api/Destinoes
         [HttpPost]
         public async Task<ActionResult<Destino>> PostDestino(Destino destino)
@@ -77,7 +80,7 @@ namespace Api.Controllers
             var createdDestino = await _destinoService.CreateDestinoAsync(destino);
             return CreatedAtAction(nameof(GetDestino), new { id = createdDestino.Id }, createdDestino);
         }
-
+        [Authorize] // Solo usuarios autenticados pueden acceder
         // DELETE: api/Destinoes/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDestino(long id)

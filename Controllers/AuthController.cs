@@ -24,7 +24,7 @@ namespace Api.Controllers
             if (token == null)
                 return Unauthorized(new { message = "Credenciales incorrectas" });
 
-            return Ok(new { token, userType }); // Se devuelve el token y el userType
+            return Ok(new { token, userType });
         }
     }
 }

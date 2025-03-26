@@ -24,7 +24,7 @@ namespace Api.Services
         public async Task<(string? Token, string? UserType)> Authenticate(LoginRequest request)
         {
             var usuario = await _usuarioRepository.GetByEmailAsync(request.Email);
-            if (usuario == null || usuario.Password != request.Password) //  En producción, usa hashing de contraseñas
+            if (usuario == null || usuario.Password != request.Password)
                 return (null, null);
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -36,16 +36,16 @@ namespace Api.Services
                 {
                     new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                     new Claim(ClaimTypes.Email, usuario.Email),
-                    new Claim(ClaimTypes.Role, usuario.UserType) // Se mantiene en los claims del token
+                    new Claim(ClaimTypes.Role, usuario.UserType)
                 }),
-                Expires = DateTime.UtcNow.AddHours(2), // Token válido por 2 horas
+                Expires = DateTime.UtcNow.AddHours(2),
                 Issuer = _configuration["Jwt:Issuer"],
                 Audience = _configuration["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return (tokenHandler.WriteToken(token), usuario.UserType); // Retornar token y userType
+            return (tokenHandler.WriteToken(token), usuario.UserType);
         }
     }
 }

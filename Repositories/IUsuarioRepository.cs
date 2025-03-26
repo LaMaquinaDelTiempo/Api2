@@ -13,5 +13,6 @@ namespace Api.Repositories
         Task<Usuario?> UpdateUsuarioByEmailAsync(string email, Usuario usuario);
         Task<bool> DeleteAsync(long id);
         Task<bool> ExistsAsync(long id);
+        Task<Usuario> RegisterUsuarioAsync(Usuario usuario);
     }
 }

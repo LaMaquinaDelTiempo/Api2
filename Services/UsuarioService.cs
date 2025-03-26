@@ -1,6 +1,8 @@
 ﻿using Api.Models;
 using Api.Repositories;
+using BCrypt.Net;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Api.Services
@@ -18,10 +20,12 @@ namespace Api.Services
         {
             return await _usuarioRepository.GetAllAsync();
         }
+
         public async Task<Usuario?> GetUsuarioByIdAsync(long id)
         {
             return await _usuarioRepository.GetByIdAsync(id);
         }
+
         public async Task<Usuario?> GetUsuarioByEmailAsync(string email)
         {
             return await _usuarioRepository.GetByEmailAsync(email);
@@ -29,7 +33,6 @@ namespace Api.Services
 
         public async Task<Usuario> CreateUsuarioAsync(Usuario usuario)
         {
-            // Aquí podrías agregar validaciones o lógica adicional antes de crear el usuario.
             return await _usuarioRepository.CreateAsync(usuario);
         }
 
@@ -42,6 +45,18 @@ namespace Api.Services
         {
             return await _usuarioRepository.DeleteAsync(id);
         }
+
+        public async Task<Usuario> RegisterUsuarioAsync(Usuario usuario)
+        {
+            usuario.Password = HashPassword(usuario.Password);
+            usuario.UserType = string.IsNullOrEmpty(usuario.UserType) ? "CLIENT" : usuario.UserType;
+
+            return await _usuarioRepository.RegisterUsuarioAsync(usuario);
+        }
+
+        private string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
     }
 }
-

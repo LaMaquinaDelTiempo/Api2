@@ -13,7 +13,7 @@ public partial class Usuario
 
     public string Nombre { get; set; } = null!;
 
-    public string? Password { get; set; }
+    public string Password { get; set; } = null!;
 
     public DateTime? UpdatedAt { get; set; }
 

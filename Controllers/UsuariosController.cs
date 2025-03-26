@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
-    
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -20,49 +19,105 @@ namespace Api.Controllers
         }
 
         // GET: api/Usuarios
-        
-        // Este endpoint solo será accesible para ADMIN
         [Authorize(Roles = "ADMIN")]
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<object>>> GetUsuarios()
         {
             var usuarios = await _usuarioService.GetAllUsuariosAsync();
-            return Ok(usuarios);
+
+            return Ok(usuarios.Select(u => new
+            {
+                u.Id,
+                u.Email,
+                u.Nombre,
+                u.UserType
+            }));
         }
+
         [Authorize] // Solo usuarios autenticados pueden acceder
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(long id)
+        public async Task<ActionResult<object>> GetUsuario(long id)
         {
             var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
             if (usuario == null)
                 return NotFound();
-            return Ok(usuario);
+
+            return Ok(new
+            {
+                usuario.Id,
+                usuario.Email,
+                usuario.Nombre,
+                usuario.UserType
+            });
         }
+
         [Authorize] // Solo usuarios autenticados pueden acceder
         // GET: api/Usuarios/email/example@gmail.com
         [HttpGet("email/{email}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(string email)
+        public async Task<ActionResult<object>> GetUsuario(string email)
         {
             var usuario = await _usuarioService.GetUsuarioByEmailAsync(email);
             if (usuario == null)
                 return NotFound();
-            return Ok(usuario);
+
+            return Ok(new
+            {
+                usuario.Id,
+                usuario.Email,
+                usuario.Nombre,
+                usuario.UserType
+            });
         }
 
-        //todos pueden acceder ya que se usa para el registro
         // POST: api/Usuarios
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        public async Task<ActionResult<object>> PostUsuario([FromBody] Usuario usuario)
         {
+            if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Password))
+                return BadRequest("Email and password are required.");
+
+            var existingUser = await _usuarioService.GetUsuarioByEmailAsync(usuario.Email);
+            if (existingUser != null)
+                return Conflict("A user with this email already exists.");
+
             var createdUsuario = await _usuarioService.CreateUsuarioAsync(usuario);
-            return CreatedAtAction(nameof(GetUsuario), new { id = createdUsuario.Id }, createdUsuario);
+
+            return CreatedAtAction(nameof(GetUsuario), new { email = createdUsuario.Email }, new
+            {
+                createdUsuario.Id,
+                createdUsuario.Email,
+                createdUsuario.Nombre,
+                createdUsuario.UserType
+            });
         }
+
+        // POST: api/Usuarios/register
+        [HttpPost("register")]
+        public async Task<ActionResult<object>> RegisterUsuario([FromBody] Usuario usuario)
+        {
+            if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Password))
+                return BadRequest("Email and password are required.");
+
+            var existingUser = await _usuarioService.GetUsuarioByEmailAsync(usuario.Email);
+            if (existingUser != null)
+                return Conflict("A user with this email already exists.");
+
+            var newUser = await _usuarioService.RegisterUsuarioAsync(usuario);
+
+            return CreatedAtAction(nameof(GetUsuario), new { email = newUser.Email }, new
+            {
+                newUser.Id,
+                newUser.Email,
+                newUser.Nombre,
+                newUser.UserType
+            });
+        }
+
         [Authorize] // Solo usuarios autenticados pueden acceder
-        // PUT: api/Usuarios/email@example.com
+        // PUT: api/Usuarios/email/test@example.com
         [HttpPut("email/{email}")]
-        public async Task<IActionResult> PutUsuario(string email, Usuario usuario)
+        public async Task<IActionResult> PutUsuario(string email, [FromBody] Usuario usuario)
         {
             if (email != usuario.Email)
                 return BadRequest("El email de la URL no coincide con el email del usuario.");

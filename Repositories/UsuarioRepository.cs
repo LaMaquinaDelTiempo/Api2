@@ -65,5 +65,18 @@ namespace Api.Repositories
         {
             return await _context.Usuarios.AnyAsync(u => u.Id == id);
         }
+
+        public async Task<Usuario> RegisterUsuarioAsync(Usuario usuario)
+        {
+            usuario.CreatedAt = usuario.CreatedAt.HasValue
+                ? DateTime.SpecifyKind(usuario.CreatedAt.Value, DateTimeKind.Unspecified)
+                : DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+
+            usuario.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
+            return usuario;
+        }
     }
 }

@@ -72,7 +72,31 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Description = "API para la gestión de usuarios y preferencias en Amadeus."
     });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Ingrese el token de acceso con el prefijo 'Bearer'",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
+
 
 var app = builder.Build();
 app.UseAuthentication(); // Habilitar autenticación con JWT

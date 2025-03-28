@@ -1,4 +1,4 @@
-﻿namespace Api.Models
+﻿namespace Api.Models;
 public class PreferenciaRequest
 {
     public string Email { get; set; }           // "probandsfds13@gmail.com"
@@ -9,4 +9,3 @@ public class PreferenciaRequest
     public string TiempoViaje { get; set; }     // "MENOR_UNA_SEMANA"
     public string RangoEdad { get; set; }       // "MENOR_QUE_TREINTA"
 }
-

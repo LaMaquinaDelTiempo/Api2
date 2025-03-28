@@ -1,7 +1,9 @@
-﻿using Api.Models;
+﻿using Api.DataContext;
+using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,11 +13,13 @@ namespace Api.Controllers
     [ApiController]
     public class PreferenciaUsuariosController : ControllerBase
     {
+        private readonly AmadeusContext _context;
         private readonly IPreferenciaUsuarioService _preferenciaUsuarioService;
 
         public PreferenciaUsuariosController(IPreferenciaUsuarioService preferenciaUsuarioService)
         {
             _preferenciaUsuarioService = preferenciaUsuarioService;
+            _context = new AmadeusContext();
         }
 
         // GET: api/PreferenciaUsuarios
@@ -69,5 +73,92 @@ namespace Api.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("asignar")]
+        public async Task<IActionResult> AsignarPreferencia([FromBody] PreferenciaRequest request)
+        {
+            // 1. Buscar al usuario por email
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (usuario == null)
+                return NotFound("Usuario no encontrado");
+
+            // 2. Verificar si ya existe la combinación de preferencia
+            var preferenciaExistente = await _context.Preferencias
+                .FirstOrDefaultAsync(p =>
+                    p.Entorno == request.Entorno &&
+                    p.Clima == request.Clima &&
+                    p.Actividad == request.Actividad &&
+                    p.Alojamiento == request.Alojamiento &&
+                    p.TiempoViaje == request.TiempoViaje &&
+                    p.RangoEdad == request.RangoEdad
+                );
+
+            // 3. Si NO existe, crear una nueva fila en Preferencias
+            if (preferenciaExistente == null)
+            {
+                preferenciaExistente = new Preferencia
+                {
+                    Entorno = request.Entorno,
+                    Clima = request.Clima,
+                    Actividad = request.Actividad,
+                    Alojamiento = request.Alojamiento,
+                    TiempoViaje = request.TiempoViaje,
+                    RangoEdad = request.RangoEdad
+                };
+
+                _context.Preferencias.Add(preferenciaExistente);
+                await _context.SaveChangesAsync();
+
+                // 3.1Asociar la nueva preferencia con los destinos de Bora Bora (39) y Emiratos Árabes (40)
+                var destinosPreferencia1 = new DestinosPreferencia
+                {
+                    PreferenciasId = preferenciaExistente.Id,
+                    DestinosId = 39
+                };
+                var destinosPreferencia2 = new DestinosPreferencia
+                {
+                    PreferenciasId = preferenciaExistente.Id,
+                    DestinosId = 40
+                };
+
+                _context.DestinosPreferencias.Add(destinosPreferencia1);
+                _context.DestinosPreferencias.Add(destinosPreferencia2);
+                await _context.SaveChangesAsync();
+            }
+            // 4. Guardar la asociación en la tabla PreferenciaUsuarios
+            //    (si no quieres duplicar la misma asociación para el mismo usuario, verifica primero)
+            var asociacionExistente = await _context.PreferenciaUsuarios
+                .FirstOrDefaultAsync(pu =>
+                    pu.UsuariosId == usuario.Id &&
+                    pu.PreferenciasId == preferenciaExistente.Id
+                );
+
+            if (asociacionExistente == null)
+            {
+                var nuevaAsociacion = new PreferenciaUsuario
+                {
+                    UsuariosId = usuario.Id,
+                    PreferenciasId = preferenciaExistente.Id,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _context.PreferenciaUsuarios.Add(nuevaAsociacion);
+                await _context.SaveChangesAsync();
+            }
+
+            // 5. Retornar los destinos asociados a esta preferencia
+            //    asumiendo que DestinosPreferencia relaciona PreferenciasId con DestinosId
+            var destinosAsociados = await _context.DestinosPreferencias
+                .Where(dp => dp.PreferenciasId == preferenciaExistente.Id)
+                .Select(dp => dp.Destinos)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(destinosAsociados);
+        }
+
     }
 }
+

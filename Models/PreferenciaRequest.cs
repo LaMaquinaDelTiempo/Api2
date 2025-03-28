@@ -6,6 +6,6 @@ public class PreferenciaRequest
     public string Clima { get; set; }           // "CALUROSO"
     public string Actividad { get; set; }       // "DEPORTES_Y_AVENTURAS"
     public string Alojamiento { get; set; }     // "HOTEL_LUJO"
-    public string TiempoViaje { get; set; }     // "MENOR_UNA_SEMANA"
-    public string RangoEdad { get; set; }       // "MENOR_QUE_TREINTA"
+    public string Tiempo_viaje { get; set; }     // "MENOR_UNA_SEMANA"
+    public string Rango_edad { get; set; }       // "MENOR_QUE_TREINTA"
 }

@@ -91,8 +91,8 @@ namespace Api.Controllers
                     p.Clima == request.Clima &&
                     p.Actividad == request.Actividad &&
                     p.Alojamiento == request.Alojamiento &&
-                    p.TiempoViaje == request.TiempoViaje &&
-                    p.RangoEdad == request.RangoEdad
+                    p.TiempoViaje == request.Tiempo_viaje &&
+                    p.RangoEdad == request.Rango_edad
                 );
 
             // 3. Si NO existe, crear una nueva fila en Preferencias
@@ -104,8 +104,8 @@ namespace Api.Controllers
                     Clima = request.Clima,
                     Actividad = request.Actividad,
                     Alojamiento = request.Alojamiento,
-                    TiempoViaje = request.TiempoViaje,
-                    RangoEdad = request.RangoEdad
+                    TiempoViaje = request.Tiempo_viaje,
+                    RangoEdad = request.Rango_edad
                 };
 
                 _context.Preferencias.Add(preferenciaExistente);

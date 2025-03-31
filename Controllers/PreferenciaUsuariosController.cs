@@ -123,23 +123,19 @@ namespace Api.Controllers
                     DestinosId = 40
                 };
 
-                // Deshabilitar el seguimiento de cambios para las entidades
                 _context.Entry(destinosPreferencia1).State = EntityState.Detached;
                 _context.Entry(destinosPreferencia2).State = EntityState.Detached;
 
-                // Agregar las entidades al contexto
                 _context.DestinosPreferencias.Add(destinosPreferencia1);
                 _context.DestinosPreferencias.Add(destinosPreferencia2);
                 await _context.SaveChangesAsync();
             }
 
             // 4. Guardar la asociación en la tabla PreferenciaUsuarios
-            //    (si no quieres duplicar la misma asociación para el mismo usuario, verifica primero)
             var asociacionExistente = await _context.PreferenciaUsuarios
-                .FirstOrDefaultAsync(pu =>
-                    pu.UsuariosId == usuario.Id &&
-                    pu.PreferenciasId == preferenciaExistente.Id
-                );
+            .FirstOrDefaultAsync(pu =>
+                pu.UsuariosId == usuario.Id
+             );
 
             if (asociacionExistente == null)
             {
@@ -151,6 +147,13 @@ namespace Api.Controllers
                     UpdatedAt = DateTime.Now
                 };
                 _context.PreferenciaUsuarios.Add(nuevaAsociacion);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                asociacionExistente.PreferenciasId = preferenciaExistente.Id;
+                asociacionExistente.UpdatedAt = DateTime.Now;
+                _context.PreferenciaUsuarios.Update(asociacionExistente);
                 await _context.SaveChangesAsync();
             }
 

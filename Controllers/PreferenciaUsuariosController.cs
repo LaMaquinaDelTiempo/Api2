@@ -16,10 +16,10 @@ namespace Api.Controllers
         private readonly AmadeusContext _context;
         private readonly IPreferenciaUsuarioService _preferenciaUsuarioService;
 
-        public PreferenciaUsuariosController(IPreferenciaUsuarioService preferenciaUsuarioService)
+        public PreferenciaUsuariosController(IPreferenciaUsuarioService preferenciaUsuarioService, AmadeusContext context)
         {
             _preferenciaUsuarioService = preferenciaUsuarioService;
-            _context = new AmadeusContext();
+            _context = context;
         }
 
         // GET: api/PreferenciaUsuarios

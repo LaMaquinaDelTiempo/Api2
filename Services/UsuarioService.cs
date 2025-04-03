@@ -10,10 +10,12 @@ namespace Api.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IDestinoRepository _destinoRepository;
 
-        public UsuarioService(IUsuarioRepository usuarioRepository)
+        public UsuarioService(IUsuarioRepository usuarioRepository, IDestinoRepository destinoRepository)
         {
             _usuarioRepository = usuarioRepository;
+            _destinoRepository = destinoRepository;
         }
 
         public async Task<IEnumerable<Usuario>> GetAllUsuariosAsync()
@@ -57,6 +59,58 @@ namespace Api.Services
         private string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        public async Task<IEnumerable<object>> GetAllUsuariosWithPreferencesAndDestinationsAsync()
+        {
+            var usuarios = await _usuarioRepository.GetAllWithPreferencesAndDestinationsAsync();
+            var result = new List<object>();
+
+            foreach (var usuario in usuarios)
+            {
+                var preferenciasIds = usuario.PreferenciaUsuarios
+                    .Where(pu => pu.PreferenciasId.HasValue)
+                    .Select(pu => pu.PreferenciasId.Value)
+                    .ToList();
+
+                var destinos = new List<Destino>();
+                if (preferenciasIds.Any())
+                {
+                    foreach (var prefId in preferenciasIds)
+                    {
+                        var usuarioEmail = usuario.Email;
+                        var destinosParaPreferencia = await _destinoRepository.GetDestinosByEmailAsync(usuarioEmail);
+                        destinos.AddRange(destinosParaPreferencia);
+                    }
+                    
+                    destinos = destinos.Distinct().ToList();
+                }
+
+                var preferencias = usuario.PreferenciaUsuarios
+                    .Where(pu => pu.Preferencias != null)
+                    .Select(pu => new
+                    {
+                        Id = pu.Preferencias.Id,
+                        Entorno = pu.Preferencias.Entorno,
+                        Clima = pu.Preferencias.Clima,
+                        Actividad = pu.Preferencias.Actividad,
+                        Alojamiento = pu.Preferencias.Alojamiento,
+                        TiempoViaje = pu.Preferencias.TiempoViaje,
+                        RangoEdad = pu.Preferencias.RangoEdad
+                    }).ToList();
+
+                result.Add(new
+                {
+                    Id = usuario.Id,
+                    Email = usuario.Email,
+                    Nombre = usuario.Nombre,
+                    UserType = usuario.UserType,
+                    Preferencias = preferencias,
+                    Destinos = destinos
+                });
+            }
+
+            return result;
         }
     }
 }

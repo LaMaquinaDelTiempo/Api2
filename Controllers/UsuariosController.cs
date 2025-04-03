@@ -34,12 +34,21 @@ namespace Api.Controllers
             }));
         }
 
-        [Authorize] // Solo usuarios autenticados pueden acceder
-        // GET: api/Usuarios/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<object>> GetUsuario(long id)
+        // GET: api/Usuarios/with-preferences-destinations
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet("with-preferences-destinations")]
+        public async Task<ActionResult<IEnumerable<object>>> GetUsuariosWithPreferencesAndDestinations()
         {
-            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+            var usuariosConPreferenciasYDestinos = await _usuarioService.GetAllUsuariosWithPreferencesAndDestinationsAsync();
+            return Ok(usuariosConPreferenciasYDestinos);
+        }
+
+        [Authorize] // Solo usuarios autenticados pueden acceder
+        // GET: api/Usuarios/email/example@gmail.com
+        [HttpGet("email/{email}")]
+        public async Task<ActionResult<object>> GetUsuario(string email)
+        {
+            var usuario = await _usuarioService.GetUsuarioByEmailAsync(email);
             if (usuario == null)
                 return NotFound();
 
@@ -53,11 +62,11 @@ namespace Api.Controllers
         }
 
         [Authorize] // Solo usuarios autenticados pueden acceder
-        // GET: api/Usuarios/email/example@gmail.com
-        [HttpGet("email/{email}")]
-        public async Task<ActionResult<object>> GetUsuario(string email)
+        // GET: api/Usuarios/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<object>> GetUsuario(long id)
         {
-            var usuario = await _usuarioService.GetUsuarioByEmailAsync(email);
+            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
             if (usuario == null)
                 return NotFound();
 

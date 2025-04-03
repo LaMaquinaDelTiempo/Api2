@@ -13,6 +13,7 @@ namespace Api.Services
         Task<Usuario> RegisterUsuarioAsync(Usuario usuario);
         Task<Usuario?> UpdateUsuarioByEmailAsync(string email, Usuario usuario);
         Task<bool> DeleteUsuarioAsync(long id);
+        Task<IEnumerable<object>> GetAllUsuariosWithPreferencesAndDestinationsAsync();
     }
 }
 

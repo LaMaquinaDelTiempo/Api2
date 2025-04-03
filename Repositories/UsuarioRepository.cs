@@ -78,5 +78,33 @@ namespace Api.Repositories
             await _context.SaveChangesAsync();
             return usuario;
         }
+
+        public async Task<IEnumerable<Usuario>> GetAllWithPreferencesAndDestinationsAsync()
+        {
+            var usuarios = await _context.Usuarios
+                .Include(u => u.PreferenciaUsuarios)
+                    .ThenInclude(pu => pu.Preferencias)
+                .ToListAsync();
+
+            foreach (var usuario in usuarios)
+            {
+                var preferenciasIds = usuario.PreferenciaUsuarios
+                    .Where(pu => pu.PreferenciasId.HasValue)
+                    .Select(pu => pu.PreferenciasId.Value)
+                    .ToList();
+
+                if (preferenciasIds.Any())
+                {
+                    var destinos = await _context.DestinosPreferencias
+                        .Where(dp => preferenciasIds.Contains(dp.PreferenciasId))
+                        .Include(dp => dp.Destinos)
+                        .Select(dp => dp.Destinos)
+                        .Distinct()
+                        .ToListAsync();
+                }
+            }
+
+            return usuarios;
+        }
     }
 }

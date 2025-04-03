@@ -14,5 +14,6 @@ namespace Api.Repositories
         Task<bool> DeleteAsync(long id);
         Task<bool> ExistsAsync(long id);
         Task<Usuario> RegisterUsuarioAsync(Usuario usuario);
+        Task<IEnumerable<Usuario>> GetAllWithPreferencesAndDestinationsAsync();
     }
 }

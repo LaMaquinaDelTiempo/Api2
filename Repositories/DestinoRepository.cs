@@ -56,35 +56,40 @@ namespace Api.Repositories
 
         public async Task<IEnumerable<Destino>> GetDestinosByEmailAsync(string email)
         {
-            // Buscar el usuario con sus preferencias
-            var usuario = await _context.Usuarios
-                .Include(u => u.PreferenciaUsuarios)
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var destinos = await _context.Usuarios
+                .AsNoTracking()
+                .Where(u => u.Email == email)
+                .Join(
+                    _context.PreferenciaUsuarios,
+                    usuario => usuario.Id,
+                    prefUsuario => prefUsuario.UsuariosId,
+                    (usuario, prefUsuario) => prefUsuario.PreferenciasId
+                )
+                .Where(prefId => prefId.HasValue)
+                .Select(prefId => prefId.Value)
+                .Distinct()
+                .Join(
+                    _context.DestinosPreferencias,
+                    prefId => prefId,
+                    destPref => destPref.PreferenciasId,
+                    (prefId, destPref) => destPref.DestinosId
+                )
+                .Join(
+                    _context.Destinos,
+                    destId => destId,
+                    destino => destino.Id,
+                    (destId, destino) => destino
+                )
+                .Distinct()
+                .ToListAsync();
 
-            if (usuario == null)
-                return new List<Destino>();
-
-            // Obtener los IDs de las preferencias del usuario
-            var preferenciasIds = usuario.PreferenciaUsuarios
-                .Select(pu => pu.PreferenciasId)
-                .Where(id => id != null)
-                .Select(id => id.Value)
-                .ToList();
-
-            // Si no tiene preferencias, devolver destinos por defecto (por ejemplo, con IDs fijos)
-            if (!preferenciasIds.Any())
+            if (!destinos.Any())
             {
                 return await _context.Destinos
+                    .AsNoTracking()
                     .Where(d => d.Id == 39 || d.Id == 40)
                     .ToListAsync();
             }
-
-            // Obtener destinos relacionados a las preferencias del usuario
-            var destinos = await _context.DestinosPreferencias
-.Where(dp => preferenciasIds.Contains(dp.PreferenciasId))
-                .Select(dp => dp.Destinos)
-                .Distinct()
-                .ToListAsync();
 
             return destinos;
         }

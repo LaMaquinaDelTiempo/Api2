@@ -42,7 +42,6 @@ namespace Api.Repositories
             if (existingUsuario == null)
                 return null;
 
-            // Mantener el ID original y actualizar solo los valores necesarios
             usuario.Id = existingUsuario.Id;
             _context.Entry(existingUsuario).CurrentValues.SetValues(usuario);
 
@@ -81,30 +80,11 @@ namespace Api.Repositories
 
         public async Task<IEnumerable<Usuario>> GetAllWithPreferencesAndDestinationsAsync()
         {
-            var usuarios = await _context.Usuarios
+            return await _context.Usuarios
                 .Include(u => u.PreferenciaUsuarios)
                     .ThenInclude(pu => pu.Preferencias)
+                .AsNoTracking()
                 .ToListAsync();
-
-            foreach (var usuario in usuarios)
-            {
-                var preferenciasIds = usuario.PreferenciaUsuarios
-                    .Where(pu => pu.PreferenciasId.HasValue)
-                    .Select(pu => pu.PreferenciasId.Value)
-                    .ToList();
-
-                if (preferenciasIds.Any())
-                {
-                    var destinos = await _context.DestinosPreferencias
-                        .Where(dp => preferenciasIds.Contains(dp.PreferenciasId))
-                        .Include(dp => dp.Destinos)
-                        .Select(dp => dp.Destinos)
-                        .Distinct()
-                        .ToListAsync();
-                }
-            }
-
-            return usuarios;
         }
     }
 }

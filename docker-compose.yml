@@ -1,0 +1,71 @@
+# Versión de Docker Compose que estamos utilizando
+version: '3.8'
+
+# Definición de los servicios que compondrán nuestra aplicación
+services:
+  # Servicio del backend de nuestra aplicación
+  nullpointers-server:
+    # Instrucciones para construir la imagen del contenedor
+    build:
+      # El contexto indica el directorio que se usa para la construcción
+      context: .
+      # Especifica qué Dockerfile usar para construir la imagen
+      dockerfile: Dockerfile
+    # Mapeo de puertos - conecta el puerto 8080 del host con el 8080 del contenedor
+    ports:
+      - "8080:8080"
+    # Indica que este servicio depende de postgres y debe iniciarse después
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Variables de entorno para configurar la aplicación
+    environment:
+      # Cadena de conexión para Entity Framework Core
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=amadeus;Username=postgres;Password=postgres
+    # Red a la que pertenece este servicio
+    networks:
+      - amadeus-network
+    # Reiniciar automáticamente si falla
+    restart: always
+
+  # Servicio de base de datos PostgreSQL
+  postgres:
+    # Imagen oficial de PostgreSQL a utilizar
+    image: postgres:15
+    # Mapeo de puertos - conecta el puerto 5432 del host con el 5432 del contenedor
+    ports:
+      - "5432:5432"
+    # Variables de entorno para configurar PostgreSQL
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=amadeus
+    # Volumen para persistir los datos entre reinicios
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # Red a la que pertenece este servicio
+    networks:
+      - amadeus-network
+    # Verifica que PostgreSQL esté funcionando correctamente
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # Reiniciar automáticamente si falla
+    restart: always
+
+# Definición de redes personalizadas
+networks:
+  # Red que usarán los servicios para comunicarse entre sí
+  amadeus-network:
+    # Tipo de red (bridge es el estándar para la comunicación local)
+    driver: bridge
+
+# Definición de volúmenes para persistencia de datos
+volumes:
+  # Volumen donde se guardarán los datos de PostgreSQL
+  postgres-data:
+    # No se especifica driver, por lo que usará el predeterminado local
+
+

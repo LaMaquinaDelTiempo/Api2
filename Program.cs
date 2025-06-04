@@ -75,7 +75,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Amadeus API",
         Version = "v1",
-        Description = "API para la gesti�n de usuarios y preferencias en Amadeus."
+        Description = "API para la gestión de usuarios y preferencias en Amadeus."
     });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -104,8 +104,16 @@ builder.Services.AddSwaggerGen(options =>
 
 
 var app = builder.Build();
-app.UseAuthentication(); // Habilitar autenticaci�n con JWT
-app.UseAuthorization();  // Habilitar autorizaci�n
+
+// Aplicar migraciones automáticamente al iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AmadeusContext>();
+    context.Database.Migrate();
+}
+
+app.UseAuthentication(); // Habilitar autenticación con JWT
+app.UseAuthorization();  // Habilitar autorización
 app.UseCors("AllowAll");
 
 // Habilitar Swagger en todos los entornos
@@ -113,7 +121,7 @@ app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
-    options.RoutePrefix = string.Empty; // Dejar vac�o para acceder en la ra�z (http://localhost:5220)
+    options.RoutePrefix = string.Empty; // Dejar vacío para acceder en la raíz (http://localhost:5220)
 });
 
 // Manejo global de excepciones
